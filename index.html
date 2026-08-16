@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Mencegah halaman di-zoom agar terasa seperti aplikasi native -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>UTAM PEGON</title>
+  <style>
+    /* ==========================================
+       CSS STYLING
+       ========================================== */
+    :root {
+      --font-serif: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+      --font-sans: 'Segoe UI', Arial, sans-serif;
+      --font-arab: 'Traditional Arabic', 'Scheherazade New', 'Noto Naskh Arabic', serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      /* Menghilangkan outline biru/hijau bawaan browser di seluruh elemen */
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    *:focus, *:focus-visible {
+      outline: none !important;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(ellipse at top, #F3ECD8 0%, #EAE1C6 55%, #E2D8B8 100%);
+      color: #2B2016;
+      font-family: var(--font-serif);
+      padding: 48px 18px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Animasi Mewah (Fade & Slide Up) */
+    @keyframes elegantFade {
+      0% { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    .smooth-view {
+      animation: elegantFade 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+    }
+
+    /* Buttons & Tabs */
+    button {
+      font-family: var(--font-sans);
+      cursor: pointer;
+      /* Transisi diperhalus */
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    .nav-tabs {
+      display: inline-flex;
+      gap: 4px;
+      margin-top: 22px;
+      border: 1px solid #D8C99A;
+      border-radius: 24px;
+      padding: 4px;
+      background: #F0E8D2;
+    }
+    
+    .nav-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      background: transparent;
+      color: #6B5A3E;
+    }
+    .nav-tab.active {
+      background: #A9812E;
+      color: #F8F2E1;
+      box-shadow: 0 4px 12px rgba(169, 129, 46, 0.25);
+    }
+    .nav-tab:not(.active):hover {
+      background: #EAD9A8;
+    }
+
+    /* Konverter Layout */
+    .card-manuscript {
+      position: relative;
+      background: #F8F2E1;
+      border: 1.5px solid #A9812E;
+      border-radius: 4px;
+      box-shadow: 0 1px 0 #C9BC9C inset, 0 18px 40px -22px rgba(43,32,22,0.35);
+      padding: 3px;
+      transition: box-shadow 0.4s ease;
+    }
+    .card-manuscript:hover {
+      box-shadow: 0 1px 0 #C9BC9C inset, 0 22px 48px -20px rgba(43,32,22,0.45);
+    }
+    
+    .card-inner {
+      border: 1px solid #D8C99A;
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .strip-pattern {
+      height: 10px;
+      background-image: repeating-linear-gradient(135deg, #A9812E 0px, #A9812E 1.5px, transparent 1.5px, transparent 9px);
+      opacity: 0.35;
+    }
+
+    .pegon-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0;
+    }
+
+    .pegon-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: vertical;
+      color: #2B2016;
+      font-size: 18px;
+      line-height: 1.75;
+      font-family: var(--font-serif);
+      transition: color 0.3s ease;
+    }
+    .pegon-input::placeholder { color: #B7A67A; transition: color 0.3s ease; }
+    .pegon-input:focus::placeholder { color: #D8C99A; }
+
+    .pegon-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+    }
+    .pegon-rule {
+      width: 1px;
+      flex: 1;
+      background: linear-gradient(#D8C99A, #A9812E, #D8C99A);
+      margin-top: 30px;
+      margin-bottom: 30px;
+    }
+
+    .pegon-copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid #A9812E;
+      border-radius: 3px;
+      padding: 5px 11px;
+      color: #6B5A2E;
+      font-size: 12px;
+    }
+    .pegon-copy-btn:not(:disabled):hover {
+      background: #F0E6C8;
+      transform: translateY(-1px);
+    }
+    .pegon-copy-btn:not(:disabled):active {
+      transform: translateY(1px);
+    }
+    .pegon-copy-btn.copied { 
+      background: #EFE6C8; 
+      border-color: #6B5A2E;
+    }
+
+    .pegon-output-text {
+      font-size: 26px;
+      line-height: 2.15;
+      min-height: 140px;
+      color: #241A0F;
+      font-family: var(--font-arab);
+      word-break: break-word;
+      transition: all 0.3s ease;
+    }
+
+    /* Chips & Panduan */
+    .pegon-chip {
+      background: #F8F2E1;
+      border: 1px solid #D8C99A;
+      border-radius: 20px;
+      padding: 7px 15px;
+      color: #5A4A2E;
+      font-size: 13px;
+    }
+    .pegon-chip:hover {
+      border-color: #A9812E;
+      background: #F0E6C8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(169, 129, 46, 0.15);
+    }
+    .pegon-chip:active {
+      transform: translateY(0);
+    }
+
+    .bab-tab {
+      border: 1px solid #A9812E;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      background: transparent;
+      color: #8A6A22;
+    }
+    .bab-tab.active { 
+      background: #A9812E; 
+      color: #F8F2E1; 
+      box-shadow: 0 4px 10px rgba(169, 129, 46, 0.2);
+    }
+    .bab-tab:not(.active):hover {
+      background: #F0E6C8;
+    }
+    
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+
+    .panduan-card {
+      border-radius: 10px;
+      padding: 10px 12px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .panduan-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(43,32,22,0.08);
+    }
+
+    .corner-svg {
+      position: absolute;
+      opacity: 0.85;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .pegon-grid { grid-template-columns: 1fr !important; }
+      .pegon-divider { flex-direction: row; padding: 6px 0 !important; }
+      .pegon-rule {
+        height: 1px; width: auto; flex: 1;
+        margin: 0 10px !important;
+        background: linear-gradient(90deg, #D8C99A, #A9812E, #D8C99A) !important;
+      }
+    }
+    @media (max-width: 560px) {
+      .pegon-panduan-grid { grid-template-columns: 1fr !important; }
+      .grid-3, .grid-4, .grid-5, .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container smooth-view">
+    
+    <!-- HEADER -->
+    <div style="text-align: center; margin-bottom: 30px;">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 14px;">
+        <span style="width: 46px; height: 1px; background: #A9812E;"></span>
+        <span style="color: #8A6A22; font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase; font-family: var(--font-sans);">
+          Alih Aksara Gundul
+        </span>
+        <span style="width: 46px; height: 1px; background: #A9812E;"></span>
+      </div>
+      <h1 style="font-size: clamp(30px, 4.5vw, 44px); margin: 0; font-weight: 500; color: #241A0F; letter-spacing: 0.01em;">
+        Pengalihan Latin Ke Pegon Arab
+      </h1>
+      <p style="color: #6B5A3E; margin-top: 12px; font-size: 14.5px; line-height: 1.7; max-width: 480px; margin-left: auto; margin-right: auto; font-family: var(--font-sans);">
+        Menyalin tradisi kitab pesantren — tulisan Latin dialihkan ke aksara Pegon, lengkap dengan pembedaan e taling dan e pepet.
+      </p>
+
+      <div class="nav-tabs">
+        <button id="tab-konverter" class="nav-tab active" onclick="setPage('konverter')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="4" x2="14" y2="4"></line><line x1="10" y1="4" x2="3" y2="4"></line><line x1="21" y1="12" x2="12" y2="12"></line><line x1="8" y1="12" x2="3" y2="12"></line><line x1="21" y1="20" x2="16" y2="20"></line><line x1="12" y1="20" x2="3" y2="20"></line><line x1="14" y1="2" x2="14" y2="6"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="16" y1="18" x2="16" y2="22"></line></svg>
+          Konverter
+        </button>
+        <button id="tab-panduan" class="nav-tab" onclick="setPage('panduan')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          Panduan
+        </button>
+      </div>
+    </div>
+
+    <!-- HALAMAN: KONVERTER -->
+    <div id="page-konverter" class="smooth-view">
+      <div class="card-manuscript">
+        <div class="card-inner">
+          
+          <!-- Hiasan Pojok -->
+          <svg class="corner-svg" style="top: 8px; left: 8px; transform: rotate(0deg);" width="26" height="26" viewBox="0 0 26 26"><path d="M2 2 Q2 16 16 16 M2 2 Q16 2 16 16 M2 2 L2 9 M2 2 L9 2" stroke="#A9812E" stroke-width="1.4" fill="none" /><circle cx="2" cy="2" r="1.6" fill="#A9812E" /></svg>
+          <svg class="corner-svg" style="top: 8px; right: 8px; transform: rotate(90deg);" width="26" height="26" viewBox="0 0 26 26"><path d="M2 2 Q2 16 16 16 M2 2 Q16 2 16 16 M2 2 L2 9 M2 2 L9 2" stroke="#A9812E" stroke-width="1.4" fill="none" /><circle cx="2" cy="2" r="1.6" fill="#A9812E" /></svg>
+          <svg class="corner-svg" style="bottom: 8px; left: 8px; transform: rotate(270deg);" width="26" height="26" viewBox="0 0 26 26"><path d="M2 2 Q2 16 16 16 M2 2 Q16 2 16 16 M2 2 L2 9 M2 2 L9 2" stroke="#A9812E" stroke-width="1.4" fill="none" /><circle cx="2" cy="2" r="1.6" fill="#A9812E" /></svg>
+          <svg class="corner-svg" style="bottom: 8px; right: 8px; transform: rotate(180deg);" width="26" height="26" viewBox="0 0 26 26"><path d="M2 2 Q2 16 16 16 M2 2 Q16 2 16 16 M2 2 L2 9 M2 2 L9 2" stroke="#A9812E" stroke-width="1.4" fill="none" /><circle cx="2" cy="2" r="1.6" fill="#A9812E" /></svg>
+          
+          <div class="strip-pattern"></div>
+
+          <div class="pegon-grid">
+            <!-- Text Input Latin -->
+            <div style="padding: 30px 30px 26px;">
+              <label style="display: block; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A6A22; margin-bottom: 14px; font-family: var(--font-sans); font-weight: 600;">
+                Tulisan Latin
+              </label>
+              <textarea id="input-text" rows="8" class="pegon-input" placeholder="Ketik teks di sini…"></textarea>
+            </div>
+
+            <!-- Divider Tengah -->
+            <div class="pegon-divider">
+              <div class="pegon-rule"></div>
+              <div style="width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid #A9812E; display: flex; align-items: center; justify-content: center; background: #F8F2E1; flex-shrink: 0; position: relative; z-index: 1;">
+                <div style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #D8C99A; display: flex; align-items: center; justify-content: center; color: #8A6A22; font-size: 15px;">ﻉ</div>
+              </div>
+              <div class="pegon-rule"></div>
+            </div>
+
+            <!-- Output Pegon -->
+            <div style="padding: 30px 30px 26px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <label style="font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600;">
+                  Aksara Pegon
+                </label>
+                <button id="copy-btn" class="pegon-copy-btn" onclick="handleCopy()">
+                  <svg id="copy-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <span id="copy-text">Salin</span>
+                </button>
+              </div>
+              
+              <div id="output-pegon" dir="rtl" lang="ar" class="pegon-output-text"></div>
+
+              <!-- Alerts -->
+              <div id="alert-guess" dir="ltr" class="smooth-view" style="display: none; align-items: flex-start; gap: 7px; margin-top: 16px; font-size: 12px; color: #1F4A3D; line-height: 1.6; font-family: var(--font-sans);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-top: 2px; flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                <span>Garis putus-putus menandai kata yang belum ada di kamus — ditebak sebagai e pepet, sebaiknya dicek manual.</span>
+              </div>
+
+              <div id="alert-arabic" dir="ltr" class="smooth-view" style="display: none; align-items: flex-start; gap: 7px; margin-top: 16px; font-size: 12px; color: #8A6A22; line-height: 1.6; font-family: var(--font-sans);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-top: 2px; flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                <span>Garis bawah utuh menandai kata serapan Arab — ditulis sesuai ejaan Arab baku, bukan dieja fonetis.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contoh Cepat -->
+      <div style="margin-top: 26px; text-align: center;">
+        <div style="font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A6A22; margin-bottom: 12px; font-family: var(--font-sans); font-weight: 600;">
+          Coba Contoh
+        </div>
+        <div id="contoh-container" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
+      </div>
+
+      <!-- Kolofon -->
+      <div style="margin-top: 40px; text-align: center;">
+        <div style="color: #A9812E; font-size: 15px; margin-bottom: 10px;">❧</div>
+        <p style="font-size: 12.5px; color: #7A6B4E; line-height: 1.8; max-width: 520px; margin: 0 auto; font-family: var(--font-sans); font-style: italic;">
+          Powered by Achmad Tamimullah.
+        </p>
+      </div>
+    </div>
+
+    <!-- HALAMAN: PANDUAN -->
+    <div id="page-panduan" class="smooth-view" style="display: none;">
+      <div class="card-manuscript" style="padding: 34px 32px;">
+        <!-- Tabs Bab -->
+        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+          <button id="tab-bab1" class="bab-tab active" onclick="setBab(1)">Bab 1</button>
+          <button id="tab-bab2" class="bab-tab" onclick="setBab(2)">Bab 2</button>
+          <button id="tab-bab3" class="bab-tab" onclick="setBab(3)">Bab 3</button>
+        </div>
+
+        <!-- Konten Bab 1 -->
+        <div id="content-bab1" class="smooth-view"></div>
+        <!-- Konten Bab 2 -->
+        <div id="content-bab2" class="smooth-view" style="display:none;"></div>
+        <!-- Konten Bab 3 -->
+        <div id="content-bab3" class="smooth-view" style="display:none;"></div>
+        
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       JAVASCRIPT LOGIC
+       ========================================== -->
+  <script>
+    // ==========================================
+    // DATA & KAMUS
+    // ==========================================
+    const ARABIC_DICT = {
+      sholat: "صلاة", shalat: "صلاة", wudhu: "وضوء", bismillah: "بسم الله",
+      alhamdulillah: "الحمد لله", assalamualaikum: "السلام عليكم",
+      waalaikumsalam: "وعليكم السلام", subhanallah: "سبحان الله",
+      masyaallah: "ما شاء الله", insyaallah: "إن شاء الله",
+      astighfirullah: "أستغفر الله", naudzubillah: "نعوذ بالله",
+      alquran: "القرآن", hadits: "حديث", akhirat: "آخرة",
+    };
+
+    const E_DICT = {
+      sore: ["taling"], meja: ["taling"], sate: ["taling"], desa: ["taling"],
+      lele: ["taling", "taling"], becak: ["pepet"], becek: ["pepet", "pepet"],
+      besar: ["pepet"], empat: ["pepet"], enam: ["pepet"], kecil: ["pepet"],
+      sekolah: ["pepet"], senang: ["pepet"], dengan: ["pepet"], kena: ["pepet"],
+      beli: ["pepet"], benar: ["pepet"], pergi: ["pepet"], teman: ["pepet"],
+      kelas: ["pepet"], kertas: ["pepet"], kepala: ["pepet"], merah: ["pepet"],
+      ember: ["pepet", "pepet"], negeri: ["pepet", "pepet"], kereta: ["pepet", "taling"],
+      keren: ["pepet", "taling"], sepeda: ["pepet", "taling"], mereka: ["pepet", "taling"],
+      merdeka: ["pepet", "taling"], dendeng: ["taling", "taling"], bela: ["taling"],
+      bebek: ["taling", "taling"], doyong: ["taling", "taling"], goyor: ["taling", "taling"],
+      delima: ["pepet"], dilema: ["taling"], enak: ["taling"], boleh: ["taling"], kode: ["pepet"],
+    };
+
+    const BUKAN_AKHIRAN = new Set(["ikan", "akan", "makan", "bukan"]);
+
+    const CONTOH = [
+      "Aku ingin sekolah", "Sebutlah nama dia", "Sore itu dia naik sepeda ke desa"
+    ];
+
+    const KONSONAN = [
+      ["J", "ج"], ["T", "ت"], ["B", "ب"], ["Z", "ز"], ["R", "ر"], ["D", "د"],
+      ["Q", "ق"], ["F / V / P", "ف"], ["S", "س"], ["M", "م"], ["L", "ل"],
+      ["K", "ك"], ["H", "ه"], ["W", "و"], ["N", "ن"], ["G", "ك"], ["C", "ج"], ["Y", "ي"]
+    ];
+    const KONSONAN_KHUSUS = [["NY", "ي"], ["NG", "غ"]];
+    const WARNA_KARTU = ["#D9D6E8", "#EFD8DE", "#DCE8D9", "#EAD9E8", "#D6E2E8", "#F0E0D0"];
+    const SUKU_KATA_GROUPS = [
+      ["b", "t", "j"], ["z", "r", "d"], ["q", "f", "s"], ["m", "l", "k"], ["h", "w", "n"], ["g", "c", "y"], ["ny", "ng"]
+    ];
+
+    const BAB2_EI_PAIRS = [["Dendeng", "Dinding"], ["Bela", "Bila"], ["Bebek", "Bibik"]];
+    const BAB2_OU_PAIRS = [["Doyong", "Duyung"], ["Bolu", "Bulu"], ["Goyor", "Guyur"]];
+    const BAB2_AMBIGU = [["غ", "NG"], ["ي", "Y atau NY"], ["ك", "K atau G"], ["ج", "J atau C"]];
+
+    const BAB3_POSISI = {
+      Awal: ["Aku", "Ikan", "Enam", "Enak", "Orang"],
+      Tengah: ["Baca", "Bila", "Sekolah", "Boleh", "Bola"],
+      Akhir: ["Meja", "Kursi", "Kode", "Sate", "Soto"],
+    };
+    const BAB3_HURUF_LABEL = ["A", "I", "Ẽ (pepet)", "E (taling)", "U/O"];
+    const BAB3_KLASTER_A = ["Baik", "Air", "Mau", "Atau", "Kiai"];
+    const BAB3_GANDA = [["Dua", "Tidak perlu wawu ganda"], ["Dia", "Tidak perlu ya' ganda"]];
+    const BAB3_AKHIRAN = [
+      "Sekolah", "Sebutlah", "Adalah", "Berdirilah", "Ialah", "Apakah", "Dimanakah",
+      "Sudahkah", "Iyakah", "Akankah", "Sebutkan", "Kerjakan", "Katakan", "Jelaskan"
+    ];
+
+    // ==========================================
+    // LOGIKA KONVERSI
+    // ==========================================
+    function isVowel(c) {
+      return ["a", "i", "u", "e", "o"].includes(c);
+    }
+
+    function mapConsonant(char) {
+      const map = {
+        b: "ب", t: "ت", j: "ج", c: "ج", d: "د", r: "ر", z: "ز",
+        s: "س", f: "ف", v: "ف", p: "ف", q: "ق", k: "ك", g: "ك",
+        l: "ل", m: "م", n: "ن", w: "و", h: "ه", y: "ي",
+      };
+      return map[char] || char;
+    }
+
+    function convertWordToPegon(word) {
+      const lower = word.toLowerCase();
+      if (ARABIC_DICT[lower]) return { pegon: ARABIC_DICT[lower], guessed: false, arabic: true };
+
+      let w = lower;
+      w = w.replace(/ia$/g, "ya");
+      w = w.replace(/ua$/g, "wa");
+
+      const beforeSuffix = w;
+      let suffix = "";
+      if (!BUKAN_AKHIRAN.has(w)) {
+        if (w.endsWith("lah")) { suffix = "له"; w = w.slice(0, -3); }
+        else if (w.endsWith("kah")) { suffix = "كه"; w = w.slice(0, -3); }
+        else if (w.endsWith("kan")) { suffix = "كن"; w = w.slice(0, -3); }
+      }
+
+      const knownETypes = E_DICT[w] || E_DICT[beforeSuffix] || null;
+      let eSeen = 0;
+      let guessed = false;
+
+      function eType() {
+        const t = knownETypes && knownETypes[eSeen];
+        eSeen++;
+        if (t) return t;
+        guessed = true;
+        return "pepet";
+      }
+
+      let pegonWord = "";
+      let i = 0;
+      const len = w.length;
+
+      while (i < len) {
+        if (i === 0 && isVowel(w[i])) {
+          const v = w[i];
+          if (v === "a") pegonWord += "أ";
+          else if (v === "i") pegonWord += "اي";
+          else if (v === "e") pegonWord += eType() === "taling" ? "اي" : "آ";
+          else if (v === "u" || v === "o") pegonWord += "او";
+          i++; continue;
+        }
+
+        if (w[i] === "a" && i + 1 < len && isVowel(w[i + 1])) {
+          const nextV = w[i + 1];
+          if (nextV === "a") pegonWord += "ائ";
+          else if (nextV === "i") pegonWord += "ائي";
+          else if (nextV === "e") pegonWord += eType() === "taling" ? "ائي" : "ائ";
+          else if (nextV === "u" || nextV === "o") pegonWord += "اؤ";
+          i += 2; continue;
+        }
+
+        if (i + 1 < len) {
+          const pair = w.substring(i, i + 2);
+          if (pair === "ng") { pegonWord += "غ"; i += 2; continue; }
+          else if (pair === "ny") { pegonWord += "ي"; i += 2; continue; }
+        }
+
+        const char = w[i];
+        if (char === "a") pegonWord += "ا";
+        else if (char === "i") pegonWord += "ي";
+        else if (char === "e") pegonWord += eType() === "taling" ? "ي" : "";
+        else if (char === "u" || char === "o") pegonWord += "و";
+        else pegonWord += mapConsonant(char);
+        i++;
+      }
+
+      pegonWord = pegonWord.replace(/ي{2,}/g, "ي").replace(/و{2,}/g, "و");
+      return { pegon: pegonWord + suffix, guessed, arabic: false };
+    }
+
+    function latinToPegonSegments(text) {
+      if (!text) return [];
+      const tokens = text.split(/(\s+|[.,!?-]+)/);
+      const segments = [];
+
+      for (let token of tokens) {
+        if (!token) continue;
+        if (/^[\s.,!?-]+$/.test(token)) {
+          segments.push({ text: token, guessed: false, arabic: false });
+          continue;
+        }
+        const { pegon, guessed, arabic } = convertWordToPegon(token);
+        segments.push({ text: pegon, guessed, arabic });
+      }
+      return segments;
+    }
+
+    // ==========================================
+    // DOM INTERACTION & UI LOGIC
+    // ==========================================
+    const inputTextEl = document.getElementById('input-text');
+    const outputPegonEl = document.getElementById('output-pegon');
+    const copyBtn = document.getElementById('copy-btn');
+    const copyText = document.getElementById('copy-text');
+    const alertGuess = document.getElementById('alert-guess');
+    const alertArabic = document.getElementById('alert-arabic');
+
+    let currentPlainOutput = "";
+
+    function handleInput() {
+      const text = inputTextEl.value;
+      const segments = latinToPegonSegments(text);
+      currentPlainOutput = segments.map(s => s.text).join("");
+
+      if (segments.length === 0) {
+        outputPegonEl.innerHTML = '<span style="color: #B7A67A">—</span>';
+        copyBtn.disabled = true;
+        copyBtn.style.cursor = "default";
+        alertGuess.style.display = "none";
+        alertArabic.style.display = "none";
+        return;
+      }
+
+      copyBtn.disabled = false;
+      copyBtn.style.cursor = "pointer";
+
+      let html = "";
+      let hasGuess = false;
+      let hasArabic = false;
+
+      segments.forEach(s => {
+        if (s.guessed) {
+          hasGuess = true;
+          html += `<span title="e pepet ditebak otomatis — kata ini belum ada di kamus, cek manual" style="border-bottom: 2px dotted #1F4A3D; padding-bottom: 1px; transition: color 0.3s ease;">${s.text}</span>`;
+        } else if (s.arabic) {
+          hasArabic = true;
+          html += `<span title="kata serapan Arab — ditulis sesuai ejaan Arab baku" style="border-bottom: 2px solid #A9812E; padding-bottom: 1px; transition: color 0.3s ease;">${s.text}</span>`;
+        } else {
+          html += `<span style="transition: color 0.3s ease;">${s.text}</span>`;
+        }
+      });
+
+      outputPegonEl.innerHTML = html;
+      alertGuess.style.display = hasGuess ? "flex" : "none";
+      alertArabic.style.display = hasArabic ? "flex" : "none";
+      alertArabic.style.marginTop = hasGuess ? "8px" : "16px";
+    }
+
+    function setExample(text) {
+      inputTextEl.value = text;
+      handleInput();
+    }
+
+    function handleCopy() {
+      if (!currentPlainOutput) return;
+      const el = document.createElement("textarea");
+      el.value = currentPlainOutput;
+      document.body.appendChild(el);
+      el.select();
+      try {
+        document.execCommand("copy");
+        copyBtn.classList.add("copied");
+        copyText.textContent = "Tersalin";
+        document.getElementById("copy-icon").innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+        
+        setTimeout(() => {
+          copyBtn.classList.remove("copied");
+          copyText.textContent = "Salin";
+          document.getElementById("copy-icon").innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>';
+        }, 1500);
+      } catch (e) {}
+      document.body.removeChild(el);
+    }
+
+    function setPage(page) {
+      const konverter = document.getElementById('page-konverter');
+      const panduan = document.getElementById('page-panduan');
+
+      // Animasi pergantian halaman dengan me-reset class smooth-view
+      if (page === 'konverter') {
+        konverter.style.display = 'block';
+        panduan.style.display = 'none';
+        
+        konverter.classList.remove('smooth-view');
+        void konverter.offsetWidth; // trigger reflow
+        konverter.classList.add('smooth-view');
+      } else {
+        konverter.style.display = 'none';
+        panduan.style.display = 'block';
+
+        panduan.classList.remove('smooth-view');
+        void panduan.offsetWidth; // trigger reflow
+        panduan.classList.add('smooth-view');
+      }
+      
+      document.getElementById('tab-konverter').className = `nav-tab ${page === 'konverter' ? 'active' : ''}`;
+      document.getElementById('tab-panduan').className = `nav-tab ${page === 'panduan' ? 'active' : ''}`;
+    }
+
+    function setBab(bab) {
+      [1, 2, 3].forEach(n => {
+        const content = document.getElementById(`content-bab${n}`);
+        if (bab === n) {
+          content.style.display = 'block';
+          // Trigger re-flow untuk reset animasi
+          content.classList.remove('smooth-view');
+          void content.offsetWidth;
+          content.classList.add('smooth-view');
+        } else {
+          content.style.display = 'none';
+        }
+        
+        document.getElementById(`tab-bab${n}`).className = `bab-tab ${bab === n ? 'active' : ''}`;
+      });
+    }
+
+    // ==========================================
+    // RENDER PANDUAN KONTEN (GENERATOR)
+    // ==========================================
+    function renderPanduan() {
+      const renderGrid = (items, cols, contentFn) => `
+        <div class="${cols}" style="margin-bottom: 26px; max-width: 640px;">
+          ${items.map((item, i) => `
+            <div class="panduan-card" style="background: ${WARNA_KARTU[i % WARNA_KARTU.length]};">
+              ${contentFn(item)}
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      // BAB 1
+      let bab1HTML = `
+        <div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 8px;">Bab 1</div>
+        <h2 style="font-size: 22px; margin: 0 0 10px; color: #241A0F; font-weight: 500; font-style: italic;">"Mengenal Huruf Pegon"</h2>
+        <p style="color: #6B5A3E; font-size: 14px; line-height: 1.7; margin-bottom: 22px; font-family: var(--font-sans); max-width: 640px;">Pegon adalah bahasa ajami (selain bahasa arab) yang ditulis menggunakan huruf-huruf hijaiyah.</p>
+      `;
+
+      bab1HTML += renderGrid(KONSONAN, "grid-3 pegon-panduan-grid", ([l, p]) => `
+        <div style="display: flex; justify-content: center; align-items: baseline; gap: 6px;">
+          <span style="font-size: 15px; color: #2B2016; font-family: var(--font-sans);">${l} :</span>
+          <span dir="rtl" style="font-size: 22px; color: #1A130C;">${p}</span>
+        </div>
+      `);
+
+      bab1HTML += renderGrid(KONSONAN_KHUSUS, "grid-2 pegon-panduan-grid", ([l, p]) => `
+        <div style="display: flex; justify-content: center; align-items: baseline; gap: 6px;">
+          <span style="font-size: 15px; color: #2B2016; font-family: var(--font-sans);">${l} :</span>
+          <span dir="rtl" style="font-size: 22px; color: #1A130C;">${p}</span>
+        </div>
+      `);
+
+      bab1HTML += `
+        <h3 style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 6px;">Cara Mengeja: Konsonan + Vokal</h3>
+        <p style="color: #6B5A3E; font-size: 13px; line-height: 1.6; margin-bottom: 16px; font-family: var(--font-sans); max-width: 640px;">Konsonan yang disambung vokal a/i/u tinggal ditambah huruf ا / ي / و di belakangnya.</p>
+      `;
+
+      const flatSukuKata = SUKU_KATA_GROUPS.flat();
+      bab1HTML += renderGrid(flatSukuKata, "grid-3 pegon-panduan-grid", (kons) => {
+        const label = kons.charAt(0).toUpperCase() + kons.slice(1);
+        const rows = ["a", "i", "u"].map(v => ({ latin: label + v, pegon: convertWordToPegon(kons + v).pegon }));
+        return rows.map(r => `
+          <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgba(43,32,22,0.12); padding: 3px 0;">
+            <span style="font-size: 13.5px; color: #2B2016; font-family: var(--font-sans);">${r.latin}</span>
+            <span dir="rtl" style="font-size: 18px; color: #1A130C;">${r.pegon}</span>
+          </div>
+        `).join('');
+      });
+
+      bab1HTML += `
+        <h3 style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 12px;">Vokal E: Taling vs Pepet</h3>
+        <div class="grid-2 pegon-panduan-grid" style="margin-bottom: 28px;">
+          <div style="border: 1px solid #D8C99A; border-radius: 4px; padding: 16px;">
+            <div style="font-size: 12px; color: #8A6A22; margin-bottom: 8px; font-family: var(--font-sans); font-weight: 600;">E Taling — ditulis ي (seperti "i")</div>
+            <div style="font-size: 15px; color: #3A2C18; line-height: 1.8;">sore → <span dir="rtl">سوري</span> &nbsp;·&nbsp; meja → <span dir="rtl">ميجا</span></div>
+          </div>
+          <div style="border: 1px solid #D8C99A; border-radius: 4px; padding: 16px;">
+            <div style="font-size: 12px; color: #1F4A3D; margin-bottom: 8px; font-family: var(--font-sans); font-weight: 600;">E Pepet — tidak ditulis huruf vokalnya</div>
+            <div style="font-size: 15px; color: #3A2C18; line-height: 1.8;">besar → <span dir="rtl">بسر</span> &nbsp;·&nbsp; sekolah → <span dir="rtl">سكوله</span></div>
+          </div>
+        </div>
+        <p style="font-size: 12.5px; color: #7A6B4E; line-height: 1.7; margin-bottom: 28px; font-family: var(--font-sans);">Karena tulisan Latin biasa tidak membedakan e taling dan e pepet, aplikasi ini memakai kamus kata yang dikenali. Kata di luar kamus ditebak sebagai e pepet dan ditandai garis putus-putus.</p>
+        
+        <h3 style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 12px;">Aturan Tambahan</h3>
+        <ul style="margin: 0; padding-left: 20px; color: #3A2C18; font-size: 14px; line-height: 2;">
+          <li>Akhiran "-ia" diubah jadi "ya" sebelum dikonversi</li>
+          <li>Akhiran "-ua" diubah jadi "wa" sebelum dikonversi</li>
+          <li>Akhiran "-lah" → <span dir="rtl">له</span>, "-kah" → <span dir="rtl">كه</span>, "-kan" → <span dir="rtl">كن</span></li>
+          <li>Huruf "ng" digabung jadi satu huruf غ, "ny" jadi ي</li>
+        </ul>
+      `;
+      document.getElementById('content-bab1').innerHTML = bab1HTML;
+
+      // BAB 2
+      let bab2HTML = `
+        <div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 8px;">Bab 2</div>
+        <h2 style="font-size: 22px; margin: 0 0 10px; color: #241A0F; font-weight: 500; font-style: italic;">"Rumusan Vokal E dan O"</h2>
+        <p style="color: #6B5A3E; font-size: 14px; line-height: 1.7; margin-bottom: 20px; font-family: var(--font-sans); max-width: 640px;">Huruf E (taling) sama dengan I, dan huruf O sama dengan U — keduanya ditulis dengan huruf yang sama. Sedangkan E pepet tidak ditulis huruf vokalnya sama sekali.</p>
+        
+        <div style="background: #EFE6CC; border: 1px solid #D8C99A; border-radius: 6px; padding: 14px 18px; margin-bottom: 26px; max-width: 640px;">
+          <div style="font-size: 14px; color: #241A0F; line-height: 2; font-family: var(--font-sans);">
+            <b>Rumusan:</b><br />Huruf E (taling) sama dengan I<br />Huruf O sama dengan U<br />Huruf E (pepet) ditulis dengan harakat bergelombang (~)
+          </div>
+        </div>
+        
+        <h3 style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 6px;">Bunyi E = I</h3>
+        <p style="color: #6B5A3E; font-size: 13px; line-height: 1.6; margin-bottom: 12px; font-family: var(--font-sans); max-width: 640px;">Karena ditulis dengan huruf yang sama, dua kata ini hasil Pegonnya identik walau ejaan Latinnya beda:</p>
+      `;
+
+      bab2HTML += renderGrid(BAB2_EI_PAIRS, "grid-3 pegon-panduan-grid", ([w1, w2]) => `
+        <div style="font-size: 13px; color: #2B2016; font-family: var(--font-sans); margin-bottom: 4px;">${w1} / ${w2}</div>
+        <div dir="rtl" style="font-size: 20px; color: #1A130C;">${convertWordToPegon(w1.toLowerCase()).pegon}</div>
+      `);
+
+      bab2HTML += `<h3 style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 6px;">Bunyi O = U</h3>`;
+      bab2HTML += renderGrid(BAB2_OU_PAIRS, "grid-3 pegon-panduan-grid", ([w1, w2]) => `
+        <div style="font-size: 13px; color: #2B2016; font-family: var(--font-sans); margin-bottom: 4px;">${w1} / ${w2}</div>
+        <div dir="rtl" style="font-size: 20px; color: #1A130C;">${convertWordToPegon(w1.toLowerCase()).pegon}</div>
+      `);
+
+      bab2HTML += `
+        <p style="font-size: 12.5px; color: #7A6B4E; line-height: 1.7; margin-bottom: 28px; font-family: var(--font-sans); max-width: 640px;">
+          Contoh lain: Rubah → <span dir="rtl">${convertWordToPegon("rubah").pegon}</span>, Roboh → <span dir="rtl">${convertWordToPegon("roboh").pegon}</span>
+        </p>
+        <h3 style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 6px;">Kaidah: Harakat Bergelombang</h3>
+        <p style="color: #6B5A3E; font-size: 13px; line-height: 1.7; margin-bottom: 26px; font-family: var(--font-sans); max-width: 640px;">Semua huruf Pegon yang tidak bergandeng dengan alif (ا), wau (و), atau ya' (ي) dibaca dengan harakat bergelombang — bunyi samar (mendekati e pepet).</p>
+        
+        <h3 style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 6px;">Membaca Huruf yang Ambigu</h3>
+      `;
+
+      bab2HTML += renderGrid(BAB2_AMBIGU, "grid-4 pegon-panduan-grid", ([pegon, bacaan]) => `
+        <div style="text-align: center;">
+          <div dir="rtl" style="font-size: 24px; color: #1A130C; margin-bottom: 4px;">${pegon}</div>
+          <div style="font-size: 12px; color: #2B2016; font-family: var(--font-sans);">dibaca <b>${bacaan}</b></div>
+        </div>
+      `);
+      document.getElementById('content-bab2').innerHTML = bab2HTML;
+
+      // BAB 3
+      let bab3HTML = `
+        <div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 8px;">Bab 3</div>
+        <h2 style="font-size: 22px; margin: 0 0 10px; color: #241A0F; font-weight: 500; font-style: italic;">"Cara Menulis Vokal Berdasarkan Posisi"</h2>
+        <p style="color: #6B5A3E; font-size: 14px; line-height: 1.7; margin-bottom: 24px; font-family: var(--font-sans); max-width: 640px;">Huruf vokal A, I, E, dan U/O ditulis dengan bentuk sedikit berbeda tergantung posisinya.</p>
+      `;
+
+      Object.entries(BAB3_POSISI).forEach(([posisi, words], pIdx) => {
+        bab3HTML += `<h3 style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 8px;">Di ${posisi}</h3>`;
+        bab3HTML += renderGrid(words, "grid-5 pegon-panduan-grid", (w, idx) => `
+          <div style="text-align: center;">
+            <div style="font-size: 11px; color: #8A6A22; font-family: var(--font-sans); margin-bottom: 3px;">${BAB3_HURUF_LABEL[words.indexOf(w)]}</div>
+            <div dir="rtl" style="font-size: 19px; color: #1A130C; margin-bottom: 3px;">${convertWordToPegon(w.toLowerCase()).pegon}</div>
+            <div style="font-size: 11px; color: #2B2016; font-family: var(--font-sans);">${w}</div>
+          </div>
+        `);
+      });
+
+      bab3HTML += `
+        <h3 style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 6px;">Kaidah Khusus: Bunyi A, I, U Setelah Bunyi A</h3>
+        <p style="color: #6B5A3E; font-size: 13px; line-height: 1.7; margin-bottom: 12px; font-family: var(--font-sans); max-width: 640px;">Bila bunyi A, I, atau U muncul tepat setelah bunyi A, ditulis pakai hamzah (ء) supaya tidak rancu dengan alif biasa.</p>
+      `;
+      bab3HTML += renderGrid(BAB3_KLASTER_A, "grid-5 pegon-panduan-grid", (w) => `
+        <div style="text-align: center;">
+          <div dir="rtl" style="font-size: 19px; color: #1A130C; margin-bottom: 3px;">${convertWordToPegon(w.toLowerCase()).pegon}</div>
+          <div style="font-size: 11px; color: #2B2016; font-family: var(--font-sans);">${w}</div>
+        </div>
+      `);
+
+      bab3HTML += `<p style="color: #6B5A3E; font-size: 13px; line-height: 1.7; margin-bottom: 10px; font-family: var(--font-sans); max-width: 640px;">Khusus huruf sejenis (wawu-wawu atau ya'-ya') yang bertemu, cukup ditulis sekali:</p>`;
+      bab3HTML += renderGrid(BAB3_GANDA, "grid-2 pegon-panduan-grid", ([w, note]) => `
+        <div style="font-size: 12px; color: #2B2016; font-family: var(--font-sans); margin-bottom: 3px;">${w} <span style="color: #7A6B4E;">— ${note}</span></div>
+        <div dir="rtl" style="font-size: 20px; color: #1A130C;">${convertWordToPegon(w.toLowerCase()).pegon}</div>
+      `);
+
+      bab3HTML += `
+        <h3 style="font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A6A22; font-family: var(--font-sans); font-weight: 600; margin-bottom: 6px;">Akhiran LAH, KAN, KAH</h3>
+      `;
+      bab3HTML += renderGrid(BAB3_AKHIRAN, "grid-4 pegon-panduan-grid", (w) => `
+        <div style="text-align: center;">
+          <div dir="rtl" style="font-size: 17px; color: #1A130C; margin-bottom: 3px;">${convertWordToPegon(w.toLowerCase()).pegon}</div>
+          <div style="font-size: 11px; color: #2B2016; font-family: var(--font-sans);">${w}</div>
+        </div>
+      `);
+
+      document.getElementById('content-bab3').innerHTML = bab3HTML;
+    }
+
+    // ==========================================
+    // INIT
+    // ==========================================
+    function init() {
+      // Setup text area event
+      inputTextEl.addEventListener('input', handleInput);
+      
+      // Render chips contoh
+      const contohContainer = document.getElementById('contoh-container');
+      CONTOH.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'pegon-chip';
+        btn.textContent = c;
+        btn.onclick = () => setExample(c);
+        contohContainer.appendChild(btn);
+      });
+
+      renderPanduan();
+      setExample("Sore itu dia naik sepeda ke desa. Sebutlah nama anak itu.");
+    }
+
+    // Jalankan aplikasi
+    init();
+
+  </script>
+</body>
+</html>
